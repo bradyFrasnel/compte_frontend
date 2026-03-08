@@ -1,9 +1,9 @@
 <template>
   <div class="dashboard-container">
     <header class="dashboard-header">
-      <h1>Tableau de bord</h1>
+      <h1><button class="shabaFAI"><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></button> vous souhaite la Bienvenue</h1>      
       <div class="user-info">
-        <span>Bienvenue, {{ user?.username }}</span>
+        <span class="username">{{ user?.username }}</span>
         <button @click="logout" class="logout-btn">Déconnexion</button>
       </div>
     </header>
@@ -11,7 +11,7 @@
     <main class="dashboard-main">
       <section class="balance-section">
         <div class="balance-card">
-          <h2>Solde total</h2>
+          <h2>Cours des comptes</h2>
           <div class="balance-amount">{{ formatCurrency(balance) }}</div>
         </div>
       </section>
@@ -51,7 +51,7 @@
       </section>
 
       <section v-if="transactions.length > 0" class="transactions-section">
-        <h2>Gestion des transactions</h2>
+        <h2>Historique des transactions</h2>
         
         <!-- Transactions en attente - Haut -->
         <div v-if="pendingTransactions.length > 0" class="transaction-group">
@@ -73,10 +73,9 @@
               >
                 <div class="transaction-item pending">
                   <div class="transaction-info">
-                    <span class="transaction-type">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }} 
+                    <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
-                    <span class="transaction-user">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span>
                   </div>
                   <div class="status-container">
                     <span class="transaction-status pending">PENDING</span>
@@ -116,10 +115,9 @@
               >
                 <div class="transaction-item pending">
                   <div class="transaction-info">
-                    <span class="transaction-type">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }} 
+                    <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
-                    <span class="transaction-user">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span>
                   </div>
                   <div class="status-container">
                     <span class="transaction-status pending">PENDING</span>
@@ -167,10 +165,9 @@
                 class="transaction-item approved"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }} 
+                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
-                  <span class="transaction-user">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span>
                 </div>
                 <div class="transaction-meta">
                   <span class="transaction-status approved">APPROVED</span>
@@ -193,11 +190,11 @@
                 class="transaction-item approved"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }} 
+                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
-                    Analyse : {{ transaction.justification }}
+                    Pour cause de : {{ transaction.justification }}
                   </span>
                 </div>
                 <div class="transaction-meta">
@@ -229,9 +226,12 @@
                 class="transaction-item rejected"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type">{{ transaction.type }}</span>
-                  <span class="transaction-amount depot">{{ formatCurrency(transaction.amount) }}</span>
-                  <span class="transaction-user">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span>
+                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
+                  </span>
+                  <span class="transaction-message" v-if="transaction.justification">
+                    Pour cause de : {{ transaction.justification }}
+                  </span>
                 </div>
                 <div class="transaction-meta">
                   <span class="transaction-status rejected">REJECTED</span>
@@ -254,9 +254,12 @@
                 class="transaction-item rejected"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type">{{ transaction.type }}</span>
-                  <span class="transaction-amount retrait">{{ formatCurrency(transaction.amount) }}</span>
-                  <span class="transaction-user">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span>
+                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
+                  </span>
+                  <span class="transaction-message" v-if="transaction.justification">
+                    Pour cause de : {{ transaction.justification }}
+                  </span>
                 </div>
                 <div class="transaction-meta">
                   <span class="transaction-status rejected">REJECTED</span>
@@ -292,13 +295,13 @@
             />
           </div>
           <div class="form-group">
-            <label for="withdrawJustification">Justification du retrait</label>
+            <label for="withdrawJustification">Notifier</label>
             <textarea
               id="withdrawJustification"
               v-model="withdrawForm.justification"
               required
               rows="3"
-              placeholder="Expliquez la raison de ce retrait..."
+              placeholder="pourquoi vous voulez faire ce retrait ??"
             ></textarea>
           </div>
           <div class="modal-actions">

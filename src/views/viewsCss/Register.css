@@ -145,12 +145,23 @@
 }
 
 @media (max-width: 768px) {
+  .register-container {
+    flex-direction: column;
+  }
+  
   .register-content {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
   
   .image-section {
-    min-height: 300px;
+    min-height: 250px;
+    width: 100%;
+    order: 1;
+  }
+  
+  .image-overlay {
+    padding: 1.5rem;
   }
   
   .image-overlay h2 {
@@ -163,6 +174,7 @@
   
   .form-section {
     padding: 1.5rem;
+    order: 2;
   }
   
   .register-form {
