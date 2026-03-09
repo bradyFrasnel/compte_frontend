@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/viewsHtml/Login.vue'
 import RegisterView from '../views/viewsHtml/Register.vue'
 import DashboardView from '../views/viewsHtml/Dashboard.vue'
+import ForgotPasswordView from '../views/viewsHtml/ForgotPassword.vue'
+import ResetPasswordView from '../views/viewsHtml/ResetPassword.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -16,6 +18,16 @@ const router = createRouter({
     {
       path: '/register',
       component: RegisterView,
+      meta: { guestOnly: true },
+    },
+    {
+      path: '/forgot-password',
+      component: ForgotPasswordView,
+      meta: { guestOnly: true },
+    },
+    {
+      path: '/reset-password',
+      component: ResetPasswordView,
       meta: { guestOnly: true },
     },
     {

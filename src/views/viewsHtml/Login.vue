@@ -15,13 +15,13 @@
           </div>
           <form @submit.prevent="handleLogin" class="login-form-content">
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="identifier">Identifiant (Email ou Nom d'utilisateur)</label>
               <input
-                type="email"
-                id="email"
-                v-model="form.email"
+                type="text"
+                id="identifier"
+                v-model="form.identifier"
                 required
-                placeholder="Entrez votre email"
+                placeholder="Entrez votre email ou nom d'utilisateur"
               />
             </div>
             <div class="form-group">
@@ -41,6 +41,7 @@
           </form>
           <div class="register-link">
             <p>Pas de compte? <router-link to="/register">S'inscrire</router-link></p>
+            <p><router-link to="/forgot-password">Mot de passe oublié?</router-link></p>
           </div>
         </div>
       </div>
@@ -58,7 +59,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const form = ref({
-  email: '',
+  identifier: '',
   password: ''
 })
 
