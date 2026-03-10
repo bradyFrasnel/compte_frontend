@@ -1,10 +1,14 @@
 <template>
   <div class="dashboard-container">
     <header class="dashboard-header">
-      <h1><button class="shabaFAI"><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></button> vous souhaite la Bienvenue</h1>      
+      <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></center></h1>      
       <div class="user-info">
-        <span class="username">{{ user?.username }}</span>
-        <button @click="logout" class="logout-btn">Déconnexion</button>
+        <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
+          <span class="profile-icon">👤</span>
+        </button>
+        <button @click="logout" class="logout-icon-btn" title="Déconnexion">
+          <span class="logout-icon">🚪</span>
+        </button>
       </div>
     </header>
 
@@ -30,10 +34,11 @@
                 min="0.01"
                 required
                 placeholder="0.00"
+                class="form-input"
               />
             </div>
-            <button type="submit" :disabled="depositLoading">
-              {{ depositLoading ? 'Dépôt...' : 'Déposer' }}
+            <button type="submit" class="btn-primary" :disabled="depositLoading">
+              {{ depositLoading ? 'Dépôt en cours...' : 'Déposer' }}
             </button>
             <p v-if="depositError" class="error">{{ depositError }}</p>
             <p v-if="depositSuccess" class="success">{{ depositSuccess }}</p>
@@ -41,7 +46,7 @@
         </div>
 
         <div v-if="user?.role === 'ADMIN'" class="action-card admin-card">
-          <h3>Administration</h3>
+          <h3>Actions Administrateur</h3>
           <div class="admin-actions">
             <button @click="showWithdrawModal = true" class="admin-btn withdraw">
               Effectuer un retrait
@@ -50,147 +55,88 @@
         </div>
       </section>
 
-      <section v-if="transactions.length > 0" class="transactions-section">
-        <h2>Historique des transactions</h2>
+      <!-- Système d'onglets pour les transactions -->
+      <section class="transactions-section">
+        <h2>Gestion des Transactions</h2>
         
-        <!-- Transactions en attente - Haut -->
-        <div v-if="pendingTransactions.length > 0" class="transaction-group">
-          <h3 class="group-title pending-title">
-            <span class="icon">⏳</span>
-            En attente ({{ pendingTransactions.length }})
-          </h3>
-          
-          <!-- Dépôts en attente -->
-          <div v-if="pendingDeposits.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title deposit-title">
-              <span class="icon">💰</span>
-              Dépôts en attente ({{ pendingDeposits.length }})
-            </h4>
-            <div class="transactions-list">
-              <div
-                v-for="transaction in pendingDeposits"
-                :key="transaction.id"
-              >
-                <div class="transaction-item pending">
-                  <div class="transaction-info">
-                    <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
-                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
-                  </span>
-                  </div>
-                  <div class="status-container">
-                    <span class="transaction-status pending">PENDING</span>
-                    <span class="transaction-date">{{ formatDate(transaction.createdAt) }}</span>
-                  </div>
-                  <div v-if="user?.role === 'ADMIN'" class="transaction-actions">
-                    <button @click="validateTransaction(transaction.id, 'APPROVED')" class="approve-btn">
-                      Approuver
-                    </button>
-                    <button @click="validateTransaction(transaction.id, 'REJECTED')" class="reject-btn">
-                      Rejeter
-                    </button>
-                    <button @click="deleteTransaction(transaction.id)" class="delete-btn">
-                      Supprimer
-                    </button>
-                  </div>
-                  <div v-else-if="transaction.userId === user?.id" class="transaction-actions">
-                    <button @click="editTransaction(transaction)" class="edit-btn">
-                      Modifier
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Retraits en attente -->
-          <div v-if="pendingWithdrawals.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title withdrawal-title">
-              <span class="icon">💸</span>
-              Retraits en attente ({{ pendingWithdrawals.length }})
-            </h4>
-            <div class="transactions-list">
-              <div
-                v-for="transaction in pendingWithdrawals"
-                :key="transaction.id"
-              >
-                <div class="transaction-item pending">
-                  <div class="transaction-info">
-                    <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
-                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
-                  </span>
-                  </div>
-                  <div class="status-container">
-                    <span class="transaction-status pending">PENDING</span>
-                    <span class="transaction-date">{{ formatDate(transaction.createdAt) }}</span>
-                  </div>
-                  <div v-if="user?.role === 'ADMIN'" class="transaction-actions">
-                    <button @click="validateTransaction(transaction.id, 'APPROVED')" class="approve-btn">
-                      Approuver
-                    </button>
-                    <button @click="validateTransaction(transaction.id, 'REJECTED')" class="reject-btn">
-                      Rejeter
-                    </button>
-                    <button @click="deleteTransaction(transaction.id)" class="delete-btn">
-                      Supprimer
-                    </button>
-                  </div>
-                  <div v-else-if="transaction.userId === user?.id" class="transaction-actions">
-                    <button @click="editTransaction(transaction)" class="edit-btn">
-                      Modifier
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Navigation par onglets -->
+        <div class="tabs-navigation">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="['tab-button', { active: activeTab === tab.id }]"
+          >
+            <span class="tab-label">{{ tab.label }}</span>
+            <span class="tab-count">({{ getTransactionCount(tab.id) }})</span>
+          </button>
         </div>
 
-        <!-- Transactions approuvées - Milieu -->
-        <div v-if="approvedTransactions.length > 0" class="transaction-group">
-          <h3 class="group-title approved-title">
-            <span class="icon">✅</span>
-            Approuvées ({{ approvedTransactions.length }})
-          </h3>
-          
-          <!-- Dépôts approuvés -->
-          <div v-if="approvedDeposits.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title deposit-title">
-              <span class="icon">💰</span>
-              Dépôts approuvés ({{ approvedDeposits.length }})
-            </h4>
-            <div class="transactions-list">
+        <!-- Contenu des onglets -->
+        <div class="tabs-content">
+          <!-- Onglet En Attente -->
+          <div v-if="activeTab === 'pending'" class="tab-content">
+            <div class="tab-header">
+              <h3>Transactions en attente de validation</h3>
+              <p>Ces transactions nécessitent votre approbation</p>
+            </div>
+            <div v-if="pendingTransactions.length === 0" class="empty-state">
+              <p>Aucune transaction en attente</p>
+            </div>
+            <div v-else class="transactions-list">
               <div
-                v-for="transaction in approvedDeposits"
+                v-for="transaction in pendingTransactions"
                 :key="transaction.id"
-                class="transaction-item approved"
+                class="transaction-item pending"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                  <span class="transaction-type">
+                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                 </div>
                 <div class="transaction-meta">
-                  <span class="transaction-status approved">APPROVED</span>
+                  <span class="transaction-status pending">PENDING</span>
                   <span class="transaction-date">{{ formatDate(transaction.createdAt) }}</span>
+                </div>
+                <div v-if="user?.role === 'ADMIN'" class="transaction-actions">
+                  <button @click="validateTransaction(transaction.id, 'APPROVED')" class="approve-btn">
+                    Approuver
+                  </button>
+                  <button @click="validateTransaction(transaction.id, 'REJECTED')" class="reject-btn">
+                    Rejeter
+                  </button>
+                  <button @click="deleteTransaction(transaction.id)" class="delete-btn">
+                    Supprimer
+                  </button>
+                </div>
+                <div v-else-if="transaction.userId === user?.id" class="transaction-actions">
+                  <button @click="editTransaction(transaction)" class="edit-btn">
+                    Modifier
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Retraits approuvés -->
-          <div v-if="approvedWithdrawals.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title withdrawal-title">
-              <span class="icon">💸</span>
-              Retraits ({{ approvedWithdrawals.length }})
-            </h4>
-            <div class="transactions-list">
+          <!-- Onglet Approuvées -->
+          <div v-if="activeTab === 'approved'" class="tab-content">
+            <div class="tab-header">
+              <h3>Transactions approuvées</h3>
+              <p>Ces transactions ont été traitées et validées</p>
+            </div>
+            <div v-if="approvedTransactions.length === 0" class="empty-state">
+              <p>Aucune transaction approuvée</p>
+            </div>
+            <div v-else class="transactions-list">
               <div
-                v-for="transaction in approvedWithdrawals"
+                v-for="transaction in approvedTransactions"
                 :key="transaction.id"
                 class="transaction-item approved"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                  <span class="transaction-type">
+                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -204,29 +150,25 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Transactions rejetées - Bas -->
-        <div v-if="rejectedTransactions.length > 0" class="transaction-group">
-          <h3 class="group-title rejected-title">
-            <span class="icon">❌</span>
-            Rejetées ({{ rejectedTransactions.length }})
-          </h3>
-          
-          <!-- Dépôts rejetés -->
-          <div v-if="rejectedDeposits.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title deposit-title">
-              <span class="icon">💰</span>
-              Dépôts rejetés ({{ rejectedDeposits.length }})
-            </h4>
-            <div class="transactions-list">
+          <!-- Onglet Rejetées -->
+          <div v-if="activeTab === 'rejected'" class="tab-content">
+            <div class="tab-header">
+              <h3>Transactions rejetées</h3>
+              <p>Ces transactions ont été traitées et refusées</p>
+            </div>
+            <div v-if="rejectedTransactions.length === 0" class="empty-state">
+              <p>Aucune transaction rejetée</p>
+            </div>
+            <div v-else class="transactions-list">
               <div
-                v-for="transaction in rejectedDeposits"
+                v-for="transaction in rejectedTransactions"
                 :key="transaction.id"
                 class="transaction-item rejected"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                  <span class="transaction-type">
+                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -241,28 +183,31 @@
             </div>
           </div>
 
-          <!-- Retraits rejetés -->
-          <div v-if="rejectedWithdrawals.length > 0" class="transaction-subgroup">
-            <h4 class="subgroup-title withdrawal-title">
-              <span class="icon">💸</span>
-              Retraits rejetés ({{ rejectedWithdrawals.length }})
-            </h4>
-            <div class="transactions-list">
+          <!-- Onglet Retraits -->
+          <div v-if="activeTab === 'withdrawals'" class="tab-content">
+            <div class="tab-header">
+              <h3>Historique des retraits</h3>
+              <p>Tous les retraits effectués sur le compte</p>
+            </div>
+            <div v-if="allWithdrawals.length === 0" class="empty-state">
+              <p>Aucun retrait effectué</p>
+            </div>
+            <div v-else class="transactions-list">
               <div
-                v-for="transaction in rejectedWithdrawals"
+                v-for="transaction in allWithdrawals"
                 :key="transaction.id"
-                class="transaction-item rejected"
+                :class="['transaction-item', transaction.status.toLowerCase()]"
               >
                 <div class="transaction-info">
-                  <span class="transaction-type"><span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
-                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
+                  <span class="transaction-type">
+                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    a effectué un <span class="transaction-type-highlight">retrait</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
                     Pour cause de : {{ transaction.justification }}
                   </span>
                 </div>
                 <div class="transaction-meta">
-                  <span class="transaction-status rejected">REJECTED</span>
                   <span class="transaction-date">{{ formatDate(transaction.createdAt) }}</span>
                 </div>
               </div>
@@ -270,11 +215,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Message si aucune transaction -->
-      <div v-if="transactions.length === 0" class="no-transactions">
-        <p>Aucune transaction pour le moment</p>
-      </div>
     </main>
 
     <!-- Modales -->
@@ -314,7 +254,6 @@
         </form>
       </div>
     </div>
-  </div>
 
   <!-- Modal d'édition de transaction -->
   <div v-if="showEditModal" class="modal-overlay">
@@ -342,6 +281,46 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal de profil utilisateur -->
+  <div v-if="showProfileModal" class="modal-overlay" @click="showProfileModal = false">
+    <div class="modal profile-modal" @click.stop>
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <span class="profile-avatar-icon">👤</span>
+        </div>
+        <h3>Profil Utilisateur</h3>
+      </div>
+      <div class="profile-content">
+        <div class="profile-info">
+          <div class="info-item">
+            <label>Nom d'utilisateur:</label>
+            <span>{{ user?.username }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span>{{ user?.email }}</span>
+          </div>
+          <div class="info-item">
+            <label>Rôle:</label>
+            <span class="role-badge" :class="user?.role?.toLowerCase()">
+              {{ user?.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>ID:</label>
+            <span>{{ user?.id }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" @click="showProfileModal = false" class="close-btn">
+          Fermer
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -375,36 +354,16 @@ const pendingTransactions = computed(() => {
   return transactions.value.filter(t => t.status === 'PENDING')
 })
 
-const pendingDeposits = computed(() => {
-  return pendingTransactions.value.filter(t => t.type === 'DEPOT')
-})
-
-const pendingWithdrawals = computed(() => {
-  return pendingTransactions.value.filter(t => t.type === 'RETRAIT')
-})
-
 const approvedTransactions = computed(() => {
   return transactions.value.filter(t => t.status === 'APPROVED')
-})
-
-const approvedDeposits = computed(() => {
-  return approvedTransactions.value.filter(t => t.type === 'DEPOT')
-})
-
-const approvedWithdrawals = computed(() => {
-  return approvedTransactions.value.filter(t => t.type === 'RETRAIT')
 })
 
 const rejectedTransactions = computed(() => {
   return transactions.value.filter(t => t.status === 'REJECTED')
 })
 
-const rejectedDeposits = computed(() => {
-  return rejectedTransactions.value.filter(t => t.type === 'DEPOT')
-})
-
-const rejectedWithdrawals = computed(() => {
-  return rejectedTransactions.value.filter(t => t.type === 'RETRAIT')
+const allWithdrawals = computed(() => {
+  return transactions.value.filter(t => t.type === 'RETRAIT')
 })
 
 const depositForm = ref({ amount: 0 })
@@ -418,6 +377,31 @@ const withdrawError = ref('')
 const depositSuccess = ref('')
 
 const user = computed(() => authStore.user)
+
+// Système d'onglets
+const activeTab = ref('pending')
+
+const tabs = [
+  { id: 'pending', label: 'En attente'},
+  { id: 'approved', label: 'Approuvées'},
+  { id: 'rejected', label: 'Rejetées'},
+  { id: 'withdrawals', label: 'Retraits'}
+]
+
+const getTransactionCount = (tabId: string) => {
+  switch (tabId) {
+    case 'pending':
+      return pendingTransactions.value.length
+    case 'approved':
+      return approvedTransactions.value.length
+    case 'rejected':
+      return rejectedTransactions.value.length
+    case 'withdrawals':
+      return allWithdrawals.value.length
+    default:
+      return 0
+  }
+}
 
 const showWithdrawModal = ref(false)
 
@@ -561,6 +545,7 @@ const showEditModal = ref(false)
 const editingTransaction = ref<Transaction | null>(null)
 const editAmount = ref('')
 const editJustification = ref('')
+const showProfileModal = ref(false)
 
 const editTransaction = (transaction: Transaction) => {
   editingTransaction.value = transaction
