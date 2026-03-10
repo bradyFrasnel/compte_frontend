@@ -91,7 +91,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ user?.username }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                 </div>
@@ -105,6 +105,9 @@
                   </button>
                   <button @click="validateTransaction(transaction.id, 'REJECTED')" class="reject-btn">
                     Rejeter
+                  </button>
+                  <button @click="editTransaction(transaction)" class="edit-btn">
+                    Modifier
                   </button>
                   <button @click="deleteTransaction(transaction.id)" class="delete-btn">
                     Supprimer
@@ -136,7 +139,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ user?.username }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -168,7 +171,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ user?.username }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -200,7 +203,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.email?.split('@')[0] || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ user?.username }}</span> 
                     a effectué un <span class="transaction-type-highlight">retrait</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -339,7 +342,9 @@ interface Transaction {
   createdAt: string
   userId: string
   user?: {
+    username: string
     email: string
+    role: string
   }
   justification?: string
 }
@@ -528,7 +533,12 @@ const deleteTransaction = async (transactionId: string) => {
 
 const updateTransactionAmount = async (transactionId: string, newAmount: number) => {
   try {
-    await api.patch(`/transactions/update/${transactionId}`, {
+    const isAdmin = user.value?.role === 'ADMIN'
+    const endpoint = isAdmin
+      ? `/transactions/admin/update/${transactionId}`
+      : `/transactions/update/${transactionId}`
+
+    await api.patch(endpoint, {
       amount: newAmount
     })
     // Recharger les transactions
@@ -569,6 +579,32 @@ const cancelEdit = () => {
   editAmount.value = ''
   editJustification.value = ''
 }
+/*
+const getUsername = (transaction: Transaction) => {
+  // Priorité 1: Username direct depuis l'objet user
+  if (transaction.user?.username) {
+    return transaction.user.username
+  }
+  
+  // Priorité 2: Extraction depuis l'email si disponible
+  if (transaction.user?.email) {
+    return transaction.user.email.split('@')[0]
+  }
+  
+  // Priorité 3: Username de l'utilisateur courant si c'est sa transaction
+  if (transaction.userId === user.value?.id && user.value?.username) {
+    return user.value.username
+  }
+  
+  // Priorité 4: Email de l'utilisateur courant si c'est sa transaction
+  if (transaction.userId === user.value?.id && user.value?.email) {
+    return user.value.email.split('@')[0]
+  }
+  
+  // Fallback: ID utilisateur
+  return `User-${transaction.userId?.slice(0, 8) || 'Inconnu'}`
+}
+*/
 
 const logout = () => {
   authStore.clear()
