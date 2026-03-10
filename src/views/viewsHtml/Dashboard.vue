@@ -91,7 +91,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.username || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ getUsername(transaction) }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                 </div>
@@ -139,7 +139,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.username || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ getUsername(transaction) }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -171,7 +171,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.username || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ getUsername(transaction) }}</span> 
                     a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -203,7 +203,7 @@
               >
                 <div class="transaction-info">
                   <span class="transaction-type">
-                    <span class="user-name">{{ transaction.user?.username || 'Utilisateur inconnu' }}</span> 
+                    <span class="user-name">{{ getUsername(transaction) }}</span> 
                     a effectué un <span class="transaction-type-highlight">retrait</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                   <span class="transaction-message" v-if="transaction.justification">
@@ -441,6 +441,9 @@ const loadUserData = async () => {
     const transactionsResponse = await api.get('/transactions/all')
     transactions.value = transactionsResponse.data
 
+    console.log('Structure des transactions:', transactions.value[0])
+
+
     // Récupérer le solde depuis le backend
     const balanceResponse = await api.get('/transactions/balance')
     balance.value = balanceResponse.data.balance
@@ -579,22 +582,20 @@ const cancelEdit = () => {
   editAmount.value = ''
   editJustification.value = ''
 }
-/*
 const getUsername = (transaction: Transaction) => {
-  // Priorité pour username direct depuis l'objet user pour retourner le username de l'utilisateur
+  // Priorité 1: Username direct depuis l'objet user
   if (transaction.user?.username) {
     return transaction.user.username
   }
   
-  // Priorité pour username de l'utilisateur courant si c'est sa transaction
-  if (transaction.userId === user.value?.id && user.value?.username) {
-    return user.value.username
+  // Priorité 2: Extraction depuis l'email (brady@example.com → brady)
+  if (transaction.user?.email) {
+    return transaction.user.email.split('@')[0]
   }
   
   // Fallback: ID utilisateur
   return `User-${transaction.userId?.slice(0, 8) || 'Inconnu'}`
 }
-*/
 
 const logout = () => {
   authStore.clear()

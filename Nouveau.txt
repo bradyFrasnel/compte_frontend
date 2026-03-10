@@ -501,3 +501,194 @@ POST /auth/reset-password
 - **Erreur silencieuse** : API continue
 
 **Le système est maintenant production-ready avec emailing professionnel !** ✅
+
+---
+
+## 👁️ **VISIBILITÉ UTILISATEUR DANS LES TRANSACTIONS**
+
+### 40. **Transparence complète implémentée**
+- **Endpoint** : `GET /transactions/all`
+- **Données utilisateur** : ID, username, email, rôle
+- **Historique** : Qui a fait quoi, quand, pourquoi
+- **Accessibilité** : Tous les utilisateurs voient tout
+
+### 41. **Structure des données retournées**
+```typescript
+// findAll() - TransactionsService
+async findAll(): Promise<Transaction[]> {
+  return this.prisma.transaction.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,        // UUID unique
+          username: true,  // Nom d'affichage
+          email: true,     // Contact direct
+          role: true,      // USER/ADMIN
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}
+```
+
+### 42. **Exemple de réponse API**
+```json
+[
+  {
+    "id": "tx-123",
+    "amount": 150.00,
+    "type": "DEPOT",
+    "status": "VALIDATED",
+    "justification": null,
+    "createdAt": "2026-03-10T22:15:00.000Z",
+    "user": {
+      "id": "user-456",
+      "username": "brady_test",
+      "email": "brady@example.com",
+      "role": "USER"
+    }
+  },
+  {
+    "id": "tx-789",
+    "amount": 50.00,
+    "type": "RETRAIT",
+    "status": "PENDING",
+    "justification": "Frais de service",
+    "createdAt": "2026-03-10T21:30:00.000Z",
+    "user": {
+      "id": "admin-001",
+      "username": "admin_main",
+      "email": "admin@sharedvault.com",
+      "role": "ADMIN"
+    }
+  }
+]
+```
+
+### 43. **Cas d'usage frontend**
+```javascript
+// Affichage possible dans le frontend
+`${transaction.user.username} (${transaction.user.email}) - ${transaction.type} de ${transaction.amount}€`
+// → "brady_test (brady@example.com) - DEPOT de 150.00€"
+
+// Version simple
+`${transaction.user.username} - ${transaction.type} de ${transaction.amount}€`
+// → "brady_test - DEPOT de 150.00€"
+
+// Avec rôle
+`${transaction.user.username} [${transaction.user.role}] - ${transaction.type} de ${transaction.amount}€`
+// → "brady_test [USER] - DEPOT de 150.00€"
+```
+
+### 44. **Avantages de la transparence**
+- **Traçabilité** : Chaque action est attribuée à son auteur
+- **Responsabilité** : Les utilisateurs sont identifiés
+- **Audit** : Historique complet qui a fait quoi
+- **Confiance** : Pas d'opérations cachées
+- **Debug** : Facile de tracer les problèmes
+
+### 45. **Sécurité préservée**
+- **Pas de mot de passe** : Jamais exposé
+- **Données contrôlées** : Seulement les champs nécessaires
+- **Accès protégé** : JWT requis pour toutes les requêtes
+- **Rôle visible** : Pour comprendre les permissions
+
+### 46. **Workflow de consultation**
+```http
+GET /transactions/all
+Authorization: Bearer jwt_token
+→ Retourne toutes les transactions avec identité complète des auteurs
+```
+
+### 47. **Implications métier**
+- **Transparence totale** : Tout le monde voit tout
+- **Pas de confidentialité** : Les transactions sont publiques entre utilisateurs
+- **Responsabilité individuelle** : Chaque action est traçable
+- **Culture d'ouverture** : Encourage la confiance
+
+---
+
+## 🔧 **DÉTAILS TECHNIQUES FINAUX**
+
+### 48. **Packages finaux**
+```json
+{
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/config": "^3.0.0",
+    "@prisma/client": "^6.0.0",
+    "nodemailer": "^8.0.2",
+    "bcrypt": "^5.1.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.19.0",
+    "class-validator": "^0.15.1",
+    "class-transformer": "^0.5.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/schematics": "^11.0.9",
+    "@nestjs/testing": "^11.0.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/node": "^22.0.0"
+  }
+}
+```
+
+### 49. **Architecture finale**
+```
+Frontend → AuthController → AuthService → EmailService → Brevo SMTP
+    ↓
+UsersController → UsersService → Prisma → PostgreSQL
+    ↓
+TransactionsController → TransactionsService → Prisma → PostgreSQL
+```
+
+---
+
+## ✅ **STATUT FINAL COMPLET**
+
+**Backend 100% production-ready avec :**
+- ✅ Authentification unifiée (email/username)
+- ✅ Réinitialisation mot de passe (6 chiffres + emails Brevo)
+- ✅ CRUD transactions complet
+- ✅ Justification retraits admin
+- ✅ Permissions granulaires (USER/ADMIN)
+- ✅ Profil utilisateur
+- ✅ Emails professionnels (100% gratuit)
+- ✅ **Visibilité utilisateur complète** (qui fait quoi)
+- ✅ Sécurité robuste
+- ✅ NestJS v11 compatible
+- ✅ Transparence totale
+
+**Le système SharedVault est maintenant complet, transparent et prêt pour la production !** 🚀
+
+---
+
+## 🎯 **RÉCAPITULATIF FINAL**
+
+### **50. Fonctionnalités complètes**
+- **Authentification** : Login unifié + reset password
+- **Gestion utilisateurs** : Profil, rôles, permissions
+- **Transactions** : CRUD complet avec justification
+- **Emails** : Brevo intégré pour reset password
+- **Transparence** : Qui fait quoi, quand, pourquoi
+- **Sécurité** : JWT, guards, validation stricte
+- **Monitoring** : Logs, erreurs, tracking emails
+
+### **51. Architecture robuste**
+- **Backend** : NestJS v11 + TypeScript
+- **Base de données** : PostgreSQL + Prisma v6
+- **Emails** : Brevo SMTP + nodemailer
+- **Authentification** : JWT + bcrypt + guards
+- **Validation** : class-validator + DTOs
+- **Configuration** : Variables environnement
+
+**SharedVault est maintenant une application complète, sécurisée et transparente !** ✨
