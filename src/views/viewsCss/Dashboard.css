@@ -22,12 +22,39 @@
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid var(--gray-200);
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mobile-logout {
+  display: none;
+}
+.desktop-logout {
+  display: flex;
 }
 
 .dashboard-header h1 {
@@ -1137,28 +1164,22 @@
   
   .dashboard-header {
     padding: 0.5rem;
-    flex-direction: column;
-    gap: 0.75rem;
   }
   
   .dashboard-header h1 {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
-  .user-info {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .logout-main {
-    order: -1;
-  }
-  
-  .profile-admin-group {
-    order: 1;
+  .header-right {
     gap: 0.5rem;
+  }
+  
+  .mobile-logout {
+    display: flex;
+  }
+  
+  .desktop-logout {
+    display: none;
   }
   
   .balance-amount {

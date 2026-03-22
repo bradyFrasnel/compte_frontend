@@ -1,17 +1,25 @@
 <template>
   <div class="dashboard-container">
     <header class="dashboard-header">
-      <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></center></h1>      
-      <div class="user-info">
-        <div class="profile-admin-group">
-          <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="padding: 0.5rem 1rem; text-decoration: none;">
-            Admin
-          </router-link>
-          <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
-            <span class="profile-icon">👤</span>
-          </button>
-        </div>
-        <button @click="logout" class="logout-icon-btn logout-main" title="Déconnexion">
+      <div class="header-left">
+        <button @click="logout" class="logout-icon-btn mobile-logout" title="Déconnexion">
+          <span class="logout-icon">🚪</span>
+        </button>
+      </div>
+
+      <h1 class="header-title">
+        <img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo">
+        <a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a>
+      </h1>      
+      
+      <div class="user-info header-right">
+        <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
+          <span class="profile-icon">👤</span>
+        </button>
+        <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="padding: 0.5rem 1rem; text-decoration: none;">
+          Admin
+        </router-link>
+        <button @click="logout" class="logout-icon-btn desktop-logout" title="Déconnexion">
           <span class="logout-icon">🚪</span>
         </button>
       </div>
