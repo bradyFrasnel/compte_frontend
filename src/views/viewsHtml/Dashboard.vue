@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <header class="dashboard-header">
       <div class="header-left">
-        <button @click="logout" class="logout-icon-btn mobile-logout" title="Déconnexion">
+        <button @click="logout" class="logout-icon-btn desktop-only" title="Déconnexion">
           <span class="logout-icon">🚪</span>
         </button>
       </div>
@@ -10,20 +10,71 @@
       <h1 class="header-title">
         <img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo">
         <a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a>
-      </h1>      
-      
+      </h1>
+
+      <!-- Desktop : Profil + Admin | Mobile : ☰ -->
       <div class="user-info header-right">
-        <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
+        <button @click="showProfileModal = true" class="profile-icon-btn desktop-only" title="Profil">
           <span class="profile-icon">👤</span>
         </button>
-        <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="padding: 0.5rem 1rem; text-decoration: none;">
+        <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn desktop-only" style="padding: 0.5rem 1rem; text-decoration: none;">
           Admin
         </router-link>
-        <button @click="logout" class="logout-icon-btn desktop-logout" title="Déconnexion">
-          <span class="logout-icon">🚪</span>
+        <button @click="toggleDrawer" class="drawer-toggle" title="Menu">
+          <span class="hamburger-icon">☰</span>
         </button>
       </div>
     </header>
+
+    <!-- Overlay du drawer -->
+    <div
+      class="drawer-overlay"
+      :class="{ 'drawer-overlay--open': showDrawer }"
+      @click="closeDrawer"
+    ></div>
+
+    <!-- Drawer Mobile -->
+    <div class="mobile-drawer" :class="{ 'mobile-drawer--open': showDrawer }">
+      <div class="drawer-header">
+        <div class="drawer-avatar">👤</div>
+        <div class="drawer-user-info">
+          <span class="drawer-username">{{ user?.username }}</span>
+          <span class="drawer-role" :class="user?.role?.toLowerCase()">
+            {{ user?.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur' }}
+          </span>
+        </div>
+        <button class="drawer-close" @click="closeDrawer">✕</button>
+      </div>
+
+      <div class="drawer-profile-info">
+        <div class="drawer-info-item">
+          <span class="drawer-info-label">📧 Email</span>
+          <span class="drawer-info-value">{{ user?.email }}</span>
+        </div>
+        <div class="drawer-info-item">
+          <span class="drawer-info-label">🏷️ Rôle</span>
+          <span class="drawer-info-value role-badge" :class="user?.role?.toLowerCase()">
+            {{ user?.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur' }}
+          </span>
+        </div>
+        <div class="drawer-info-item">
+          <span class="drawer-info-label">🆔 ID</span>
+          <span class="drawer-info-value drawer-id">{{ user?.id }}</span>
+        </div>
+        <!-- Lien Admin dans le drawer si applicable -->
+        <div v-if="user?.role === 'ADMIN'" class="drawer-info-item">
+          <router-link to="/admin" @click="closeDrawer" class="drawer-admin-link">
+            🛡️ Aller au panneau Admin
+          </router-link>
+        </div>
+      </div>
+
+      <div class="drawer-actions">
+        <button @click="logout(); closeDrawer()" class="drawer-logout-btn">
+          <span>🚪</span> Se déconnecter
+        </button>
+      </div>
+    </div>
 
     <main class="dashboard-main">
       <section class="balance-section">
@@ -551,6 +602,11 @@ const editingTransaction = ref<Transaction | null>(null)
 const editAmount = ref('')
 const editJustification = ref('')
 const showProfileModal = ref(false)
+
+// Drawer mobile
+const showDrawer = ref(false)
+const toggleDrawer = () => { showDrawer.value = !showDrawer.value }
+const closeDrawer = () => { showDrawer.value = false }
 
 const editTransaction = (transaction: Transaction) => {
   editingTransaction.value = transaction

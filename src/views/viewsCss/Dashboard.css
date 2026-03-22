@@ -958,6 +958,19 @@
     width: 100%;
     justify-content: space-between;
   }
+
+  .header-title {
+    font-size: 1.1rem;
+  }
+
+  .header-title .header-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-right {
+    margin-left: auto;
+  }
   
   .balance-card {
     padding: 1.5rem;
@@ -1163,15 +1176,48 @@
   }
   
   .dashboard-header {
-    padding: 0.5rem;
+    padding: 0.6rem 0 0.6rem 1rem !important; /* Zéro padding à droite */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    width: 100% !important;
   }
   
   .dashboard-header h1 {
-    font-size: 1.1rem;
+    font-size: 1.3rem !important;
+    margin: 0 !important;
+  }
+
+  .header-left {
+    display: none !important;
+  }
+
+  .header-title {
+    font-size: 1.3rem !important;
+    flex: 1 !important;
+    justify-content: flex-start !important;
+    gap: 0.4rem !important;
+  }
+
+  .header-title .shabaFAI,
+  .header-title a {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+  }
+
+  .header-title .header-logo {
+    width: 36px !important;
+    height: 36px !important;
+    margin-right: 0.5rem !important;
   }
   
   .header-right {
-    gap: 0.5rem;
+    gap: 0 !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    padding-right: 0 !important;
   }
   
   .mobile-logout {
@@ -1856,3 +1902,247 @@
     padding: 0.5rem 1rem;
   }
 }
+
+/* ============================================
+   DRAWER MOBILE
+   ============================================ */
+
+.drawer-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.6rem 0.6rem 0.6rem 1rem !important; /* Large pour le pouce, mais collé à droite */
+  border-radius: 12px 0 0 12px !important; /* Carré à droite pour toucher le bord */
+  transition: background 0.2s ease;
+  margin-right: 0 !important;
+}
+
+.drawer-toggle:hover {
+  background: var(--gray-100);
+}
+
+.hamburger-icon {
+  font-size: 1.5rem;
+  color: var(--navy-blue);
+  line-height: 1;
+}
+
+.desktop-only {
+  display: flex;
+}
+
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay--open {
+  display: block;
+  opacity: 1;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 280px;
+  background: var(--white);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px 0 0 16px;
+}
+
+.mobile-drawer--open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1rem;
+  background: linear-gradient(135deg, var(--navy-blue), var(--navy-blue-dark, #1e3a8a));
+  border-radius: 16px 0 0 0;
+  position: relative;
+}
+
+.drawer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.drawer-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-username {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.drawer-role.admin {
+  background: rgba(245, 158, 11, 0.25);
+  color: #FCD34D;
+}
+
+.drawer-role.user {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.drawer-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: var(--white);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.drawer-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.drawer-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.75rem 0;
+  overflow-y: auto;
+}
+
+.drawer-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.drawer-info-item:last-child {
+  border-bottom: none;
+}
+
+.drawer-info-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.drawer-info-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-900);
+  word-break: break-all;
+}
+
+.drawer-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.drawer-actions {
+  padding: 1.25rem 1rem;
+  border-top: 1px solid var(--gray-100);
+  margin-top: auto; /* Pousse la déconnexion tout en bas du drawer */
+}
+
+.drawer-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--error);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+}
+
+.drawer-logout-btn:hover {
+  background: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+@media (max-width: 480px) {
+  .drawer-toggle {
+    display: flex;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+.drawer-admin-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--navy-blue);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  padding: 0.25rem 0;
+  transition: color 0.2s ease;
+}
+
+.drawer-admin-link:hover {
+  color: var(--navy-blue-dark, #1e3a8a);
+}
+
