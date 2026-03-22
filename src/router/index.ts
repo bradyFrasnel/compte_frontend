@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/viewsHtml/Login.vue'
 import RegisterView from '../views/viewsHtml/Register.vue'
 import DashboardView from '../views/viewsHtml/Dashboard.vue'
+import DashbordAdminView from '../views/viewsHtml/DashbordAdmin.vue'
 import ForgotPasswordView from '../views/viewsHtml/ForgotPassword.vue'
 import ResetPasswordView from '../views/viewsHtml/ResetPassword.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -35,6 +36,11 @@ const router = createRouter({
       component: DashboardView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/admin',
+      component: DashbordAdminView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 
@@ -54,6 +60,11 @@ router.beforeEach((to, _from, next) => {
   }
 
   if (to.meta.guestOnly && isAuthenticated) {
+    next({ path: '/dashboard' })
+    return
+  }
+
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
     next({ path: '/dashboard' })
     return
   }

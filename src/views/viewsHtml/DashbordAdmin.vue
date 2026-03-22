@@ -1,11 +1,8 @@
 <template>
   <div class="dashboard-container">
     <header class="dashboard-header">
-      <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></center></h1>      
+      <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI - Admin</a></center></h1>      
       <div class="user-info">
-        <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="margin-right:1rem; padding: 0.5rem 1rem; text-decoration: none;">
-          Panel Admin
-        </router-link>
         <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
           <span class="profile-icon">👤</span>
         </button>
@@ -67,7 +64,18 @@
         <div v-if="dataLoadError" class="error-card">
           <p>⚠️ {{ dataLoadError }}</p>
         </div>
+
+        <div v-if="user?.role === 'ADMIN'" class="action-card admin-card">
+          <h3>Actions Administrateur</h3>
+          <div class="admin-actions">
+            <button @click="showWithdrawModal = true" class="admin-btn withdraw">
+              Effectuer un retrait
+            </button>
+          </div>
+        </div>
       </section>
+
+      <!-- La section membres a été déplacée dans les onglets -->
 
       <!-- Système d'onglets pour les transactions -->
       <section class="transactions-section">
@@ -115,7 +123,21 @@
                   <span class="transaction-status pending">PENDING</span>
                   <span class="transaction-date">{{ formatDate(transaction.createdAt) }}</span>
                 </div>
-                <div v-if="transaction.userId === user?.id" class="transaction-actions">
+                <div v-if="user?.role === 'ADMIN'" class="transaction-actions">
+                  <button @click="validateTransaction(transaction.id, 'APPROVED')" class="approve-btn">
+                    Approuver
+                  </button>
+                  <button @click="validateTransaction(transaction.id, 'REJECTED')" class="reject-btn">
+                    Rejeter
+                  </button>
+                  <button @click="editTransaction(transaction)" class="edit-btn">
+                    Modifier
+                  </button>
+                  <button @click="deleteTransaction(transaction.id)" class="delete-btn">
+                    Supprimer
+                  </button>
+                </div>
+                <div v-else-if="transaction.userId === user?.id" class="transaction-actions">
                   <button @click="editTransaction(transaction)" class="edit-btn">
                     Modifier
                   </button>
@@ -221,11 +243,21 @@
 
           <!-- Onglet Membres -->
           <div v-if="activeTab === 'members'" class="tab-content">
-            <div class="tab-header">
-              <h3>Tableau d'historique des Dépôts (SEMAINE)</h3>
-              <p>Visualisez les dépôts validés des membres pour la cotisation hebdomadaire.</p>
+            <div class="tab-header members-header">
+              <div class="members-header-title">
+                <h3>Tableau d'historique des Dépôts (SEMAINE)</h3>
+                <p>Visualisez les dépôts validés des membres pour la cotisation hebdomadaire.</p>
+              </div>
+              <div class="members-actions">
+                <button @click="showAddMemberModal = true" class="admin-btn add-member">
+                  Ajouter un membre
+                </button>
+                <button @click="downloadWeeklyReport" class="admin-btn report">
+                   Télécharger le rapport PDF
+                </button>
+              </div>
             </div>
-            
+
             <div v-if="hebdomadaireDeposits.length === 0" class="empty-state" style="margin-bottom: 2rem;">
               <p>Aucun dépôt SEMAINE validé pour le moment.</p>
             </div>
@@ -256,7 +288,7 @@
 
             <h4 style="margin-bottom: 1rem; color: var(--gray-800); border-top: 1px solid var(--gray-200); padding-top: 2rem;">Membres Autorisés</h4>
             <div v-if="members.length === 0" class="empty-state">
-              <p>Aucun membre enregistré ou accès non autorisé</p>
+              <p>Aucun membre enregistré</p>
             </div>
             <div v-else class="members-list">
               <div v-for="member in members" :key="member.id" class="member-item">
@@ -268,6 +300,11 @@
                     <span class="member-date">Ajouté le {{ formatDate(member.createdAt) }}</span>
                   </div>
                 </div>
+                <div class="member-actions">
+                  <button @click="removeMember(member.userId, member.nom)" class="remove-btn">
+                    Supprimer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -276,6 +313,42 @@
     </main>
 
     <!-- Modales -->
+    <div v-if="showWithdrawModal" class="modal-overlay" @click="showWithdrawModal = false">
+      <div class="modal" @click.stop>
+        <h3>Effectuer un retrait</h3>
+        <form @submit.prevent="handleWithdraw">
+          <div class="form-group">
+            <label for="withdrawAmount">Montant</label>
+            <input
+              type="number"
+              id="withdrawAmount"
+              v-model.number="withdrawForm.amount"
+              step="0.01"
+              min="0.01"
+              required
+              placeholder="0.00"
+            />
+          </div>
+          <div class="form-group">
+            <label for="withdrawJustification">Notifier</label>
+            <textarea
+              id="withdrawJustification"
+              v-model="withdrawForm.justification"
+              required
+              rows="3"
+              placeholder="pourquoi vous voulez faire ce retrait ??"
+            ></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="showWithdrawModal = false">Annuler</button>
+            <button type="submit" :disabled="withdrawLoading">
+              {{ withdrawLoading ? 'Retrait...' : 'Retirer' }}
+            </button>
+          </div>
+          <p v-if="withdrawError" class="error">{{ withdrawError }}</p>
+        </form>
+      </div>
+    </div>
 
   <!-- Modal d'édition de transaction -->
   <div v-if="showEditModal" class="modal-overlay">
@@ -346,7 +419,54 @@
     </div>
   </div>
 
+  <!-- Modal Ajout Membre -->
+  <div v-if="showAddMemberModal" class="modal-overlay" @click="showAddMemberModal = false">
+    <div class="modal" @click.stop>
+      <h3>Ajouter un membre</h3>
+      
+      <!-- Formulaire avec liste déroulante -->
+      <form @submit.prevent="addMember">
+        <div class="form-group">
+          <label for="memberUserId">Sélectionner un utilisateur</label>
+          <select
+            id="memberUserId"
+            v-model="memberForm.userId"
+            @change="updateMemberName"
+            required
+            class="form-input"
+            :disabled="loadingUsers"
+          >
+            <option value="" disabled>-- Choisir un utilisateur --</option>
+            <option 
+              v-for="user in availableUsers" 
+              :key="user.id" 
+              :value="user.id"
+            >
+              {{ user.username }} ({{ user.email }})
+            </option>
+          </select>
+          <div v-if="loadingUsers" class="loading-text">Chargement des utilisateurs...</div>
+        </div>
 
+        <div class="form-group">
+          <label for="memberName">Nom du membre</label>
+          <input
+            type="text"
+            id="memberName"
+            v-model="memberForm.nom"
+            placeholder="Nom complet du membre"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" @click="showAddMemberModal = false">Annuler</button>
+          <button type="submit" :disabled="!memberForm.userId || !memberForm.nom">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -383,6 +503,13 @@ interface Member {
   }
 }
 
+interface AvailableUser {
+  id: string
+  username: string
+  email: string
+  role: string
+}
+
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -394,6 +521,25 @@ const members = ref<Member[]>([])
 const depositForm = ref({
   amount: 0,
   categorie: 'ABONNEMENT' as 'SEMAINE' | 'ABONNEMENT'
+})
+
+const memberForm = ref({
+  userId: '',
+  nom: ''
+})
+
+const availableUsers = ref<AvailableUser[]>([])
+const loadingUsers = ref(false)
+
+// Modales
+const showAddMemberModal = ref(false)
+
+// Watcher pour charger les utilisateurs quand on ouvre le modal
+import { watch } from 'vue'
+watch(showAddMemberModal, (newValue) => {
+  if (newValue && availableUsers.value.length === 0) {
+    loadAvailableUsers()
+  }
 })
 
 const pendingTransactions = computed(() => {
@@ -420,8 +566,13 @@ const hebdomadaireTotal = computed(() => {
   return hebdomadaireDeposits.value.reduce((sum, t) => sum + Number(t.amount), 0)
 })
 
+const withdrawForm = ref({ amount: 0, justification: '' })
+
 const depositLoading = ref(false)
+const withdrawLoading = ref(false)
+
 const depositError = ref('')
+const withdrawError = ref('')
 const depositSuccess = ref('')
 const dataLoadError = ref('')
 
@@ -455,7 +606,7 @@ const getTransactionCount = (tabId: string) => {
   }
 }
 
-
+const showWithdrawModal = ref(false)
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('fr-FR', {
@@ -488,13 +639,14 @@ const loadUserData = async () => {
     const transactionsResponse = await api.get('/transactions/all')
     transactions.value = transactionsResponse.data
 
-    // Récupérer les membres
-    try {
+    // Récupérer les membres (si admin)
+    if (authStore.user?.role === 'ADMIN') {
       const membersResponse = await api.get('/members/all')
       members.value = membersResponse.data
-    } catch (memberError) {
-      console.warn('Impossible de charger les membres:', memberError)
     }
+
+    console.log('Structure des transactions:', transactions.value[0])
+
 
     // Récupérer le solde depuis le backend
     const balanceResponse = await api.get('/transactions/balance')
@@ -509,12 +661,78 @@ const loadUserData = async () => {
       // Afficher une erreur mais rester connecté
       dataLoadError.value = 'Erreur de chargement des données. Certaines fonctionnalités peuvent être limitées.'
       console.warn('Erreur de chargement des données, mais l\'utilisateur reste connecté')
+      // Charger les données de base si possible
+      try {
+        if (authStore.user?.role === 'ADMIN') {
+          // Essayer de charger uniquement les membres
+          const membersResponse = await api.get('/members/all')
+          members.value = membersResponse.data
+        }
+      } catch (memberError) {
+        console.warn('Impossible de charger les membres:', memberError)
+      }
     }
   }
 }
 
+const handleWithdraw = async () => {
+  withdrawLoading.value = true
+  withdrawError.value = ''
 
+  try {
+    await api.post('/transactions/admin/withdraw-with-justification', {
+      amount: withdrawForm.value.amount,
+      justification: withdrawForm.value.justification
+    })
 
+    showWithdrawModal.value = false
+    withdrawForm.value.amount = 0
+    withdrawForm.value.justification = ''
+    
+    // Recharger les données
+    await loadUserData()
+  } catch (err: any) {
+    withdrawError.value = err.response?.data?.message || 'Erreur lors du retrait'
+  } finally {
+    withdrawLoading.value = false
+  }
+}
+
+const validateTransaction = async (transactionId: string, status: 'APPROVED' | 'REJECTED') => {
+  try {
+    console.log('Tentative de validation:', { transactionId, status, userRole: user.value?.role })
+    await api.patch(`/transactions/admin/validate/${transactionId}`, {
+      status,
+      justification: `Validation par administrateur: ${status === 'APPROVED' ? 'Approuvée' : 'Rejetée'}`
+    })
+    // Recharger les transactions
+    await loadUserData()
+  } catch (err: any) {
+    console.error('Erreur validation transaction:', err)
+    if (err.response?.status === 403) {
+      alert('Erreur: Vous n\'avez pas les droits administrateur pour valider cette transaction.')
+    }
+  }
+}
+
+const deleteTransaction = async (transactionId: string) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.')) {
+    return
+  }
+  
+  try {
+    await api.delete(`/transactions/admin/delete/${transactionId}`)
+    // Recharger les transactions
+    await loadUserData()
+  } catch (err: any) {
+    console.error('Erreur suppression transaction:', err)
+    if (err.response?.status === 403) {
+      alert('Erreur: Vous n\'avez pas les droits administrateur pour supprimer cette transaction.')
+    } else {
+      alert('Erreur lors de la suppression de la transaction.')
+    }
+  }
+}
 
 const updateTransactionAmount = async (transactionId: string, newAmount: number) => {
   try {
@@ -580,10 +798,72 @@ const getUsername = (transaction: Transaction) => {
 }
 
 // Fonctions pour la gestion des membres
+const loadMembers = async () => {
+  try {
+    const response = await api.get('/members/all')
+    members.value = response.data
+  } catch (error) {
+    console.error('Erreur chargement membres:', error)
+  }
+}
 
+const loadAvailableUsers = async () => {
+  loadingUsers.value = true
+  try {
+    const response = await api.get('/users/all')
+    availableUsers.value = response.data
+  } catch (error) {
+    console.error('Erreur chargement utilisateurs disponibles:', error)
+  } finally {
+    loadingUsers.value = false
+  }
+}
 
+const updateMemberName = () => {
+  const selectedUser = availableUsers.value.find(u => u.id === memberForm.value.userId)
+  if (selectedUser) {
+    memberForm.value.nom = selectedUser.username
+  }
+}
 
+const addMember = async () => {
+  try {
+    await api.post('/members/add', {
+      userId: memberForm.value.userId,
+      nom: memberForm.value.nom
+    })
+    
+    // Recharger la liste des membres
+    await loadMembers()
+    
+    // Réinitialiser et fermer le modal
+    memberForm.value = { userId: '', nom: '' }
+    showAddMemberModal.value = false
+    
+    alert('Membre ajouté avec succès!')
+  } catch (error: any) {
+    console.error('Erreur ajout membre:', error)
+    alert(error.response?.data?.message || 'Erreur lors de l\'ajout du membre')
+  }
+}
 
+const removeMember = async (memberId: string, memberName: string) => {
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer ${memberName} des membres ?`)) {
+    return
+  }
+  
+  try {
+    await api.delete(`/members/remove/${memberId}`)
+    
+    // Recharger la liste des membres
+    await loadMembers()
+    
+    alert('Membre supprimé avec succès!')
+  } catch (error: any) {
+    console.error('Erreur suppression membre:', error)
+    alert(error.response?.data?.message || 'Erreur lors de la suppression du membre')
+  }
+}
 
 // Fonction pour les dépôts catégorisés
 const handleDepositWithCategory = async () => {
@@ -614,6 +894,27 @@ const handleDepositWithCategory = async () => {
   }
 }
 
+// Fonction pour les rapports PDF
+const downloadWeeklyReport = async () => {
+  try {
+    const response = await api.get('/reports/current-week', {
+      responseType: 'blob'
+    })
+    
+    // Créer un lien pour télécharger le PDF
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `rapport-hebdomadaire-${new Date().toISOString().split('T')[0]}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Erreur téléchargement rapport:', error)
+    alert('Erreur lors du téléchargement du rapport PDF')
+  }
+}
 
 const logout = () => {
   authStore.clear()
@@ -625,4 +926,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="../viewsCss/Dashboard.css"></style>
+<style src="../viewsCss/DashboardAdmin.css"></style>
