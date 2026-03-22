@@ -3,13 +3,15 @@
     <header class="dashboard-header">
       <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI</a></center></h1>      
       <div class="user-info">
-        <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="margin-right:1rem; padding: 0.5rem 1rem; text-decoration: none;">
-          Panel Admin
-        </router-link>
-        <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
-          <span class="profile-icon">👤</span>
-        </button>
-        <button @click="logout" class="logout-icon-btn" title="Déconnexion">
+        <div class="profile-admin-group">
+          <router-link v-if="user?.role === 'ADMIN'" to="/admin" class="admin-btn" style="padding: 0.5rem 1rem; text-decoration: none;">
+            Admin
+          </router-link>
+          <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
+            <span class="profile-icon">👤</span>
+          </button>
+        </div>
+        <button @click="logout" class="logout-icon-btn logout-main" title="Déconnexion">
           <span class="logout-icon">🚪</span>
         </button>
       </div>
@@ -222,8 +224,8 @@
           <!-- Onglet Membres -->
           <div v-if="activeTab === 'members'" class="tab-content">
             <div class="tab-header">
-              <h3>Tableau d'historique des Dépôts (SEMAINE)</h3>
-              <p>Visualisez les dépôts validés des membres pour la cotisation hebdomadaire.</p>
+              <h3>Tableau d'historique des Dépôts</h3>
+              <p>Visualisez les dépôts pour la cotisation hebdomadaire.</p>
             </div>
             
             <div v-if="hebdomadaireDeposits.length === 0" class="empty-state" style="margin-bottom: 2rem;">

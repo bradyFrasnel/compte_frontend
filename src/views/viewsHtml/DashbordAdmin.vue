@@ -3,10 +3,15 @@
     <header class="dashboard-header">
       <h1><center><img src="/src/assets/logos/logo_fai.png" alt="Logo" class="header-logo"><a href="https://shabfai-6a53f.web.app/admin">shabaFAI - Admin</a></center></h1>      
       <div class="user-info">
-        <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
-          <span class="profile-icon">👤</span>
-        </button>
-        <button @click="logout" class="logout-icon-btn" title="Déconnexion">
+        <div class="profile-admin-group">
+          <router-link v-if="user?.role === 'ADMIN'" to="/dashboard" class="admin-btn" style="padding: 0.5rem 1rem; text-decoration: none;">
+            Panel Utilisateur
+          </router-link>
+          <button @click="showProfileModal = true" class="profile-icon-btn" title="Profil">
+            <span class="profile-icon">👤</span>
+          </button>
+        </div>
+        <button @click="logout" class="logout-icon-btn logout-main" title="Déconnexion">
           <span class="logout-icon">🚪</span>
         </button>
       </div>
