@@ -1440,3 +1440,363 @@
 .transaction-item {
   animation: slideIn 0.3s ease-out;
 }
+
+/* Styles pour les messages d'erreur de chargement */
+.error-card {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.error-card p {
+  margin: 0;
+  color: #991B1B;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Styles pour la gestion des membres */
+.members-section {
+  margin-bottom: 2rem;
+  animation: slideIn 0.8s ease-out;
+}
+
+.members-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.members-header p {
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.members-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-btn.add-member {
+  background: var(--jade-green);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-btn.add-member:hover {
+  background: var(--jade-green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
+}
+
+.admin-btn.report {
+  background: var(--navy-blue);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-btn.report:hover {
+  background: var(--navy-blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.members-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.member-item {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.member-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+}
+
+.member-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.member-username {
+  font-weight: 500;
+  color: var(--navy-blue);
+}
+
+.member-email {
+  color: var(--gray-500);
+}
+
+.member-date {
+  color: var(--gray-400);
+  font-size: 0.75rem;
+}
+
+.member-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.remove-btn {
+  background: var(--error);
+  color: var(--white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.remove-btn:hover {
+  background: #DC2626;
+  transform: translateY(-1px);
+}
+
+/* Styles pour les catégories de transaction */
+.transaction-category {
+  background: var(--navy-blue);
+  color: var(--white);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.transaction-category[href="SEMAINE"] {
+  background: var(--jade-green);
+}
+
+/* Styles pour le formulaire de dépôt avec catégories */
+.category-info {
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.category-info p {
+  margin: 0;
+  color: #92400E;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Modal Ajout Membre */
+.users-selection {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.load-users-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--gray-100);
+  border: 1px dashed var(--gray-400);
+  color: var(--gray-700);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.load-users-btn:hover:not(:disabled) {
+  background-color: var(--gray-200);
+}
+
+.load-users-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+  background-color: var(--success);
+  color: white;
+  border-color: transparent;
+}
+
+.users-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-item {
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
+.user-item:hover {
+  background-color: var(--gray-50);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.user-role {
+  font-size: 0.7rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--gray-200);
+  border-radius: 10px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.user-select-icon {
+  color: var(--navy-blue);
+  font-weight: bold;
+}
+
+.modal-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+.modal-divider::before,
+.modal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--gray-200);
+}
+
+.modal-divider span {
+  padding: 0 1rem;
+}
+
+.loading-text {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* Responsive Design pour les membres */
+@media (max-width: 768px) {
+  .members-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .members-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .admin-btn.add-member,
+  .admin-btn.report {
+    flex: 1;
+  }
+  
+  .member-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .member-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .member-details {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .members-section {
+    padding: 1rem;
+  }
+  
+  .member-item {
+    padding: 1rem;
+  }
+  
+  .member-name {
+    font-size: 1rem;
+  }
+  
+  .member-details {
+    font-size: 0.75rem;
+  }
+  
+  .admin-btn.add-member,
+  .admin-btn.report {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+}

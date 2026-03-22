@@ -23,7 +23,7 @@
       <section class="actions-section">
         <div class="action-card">
           <h3>Déposer des fonds</h3>
-          <form @submit.prevent="handleDeposit" class="deposit-form">
+          <form @submit.prevent="handleDepositWithCategory" class="deposit-form">
             <div class="form-group">
               <label for="amount">Montant</label>
               <input
@@ -33,16 +33,36 @@
                 step="0.01"
                 min="0.01"
                 required
-                placeholder="0.00"
+                placeholder="Entrez le montant"
                 class="form-input"
               />
             </div>
+            <div class="form-group">
+              <label for="categorie">Catégorie de dépôt</label>
+              <select 
+                id="categorie" 
+                v-model="depositForm.categorie"
+                class="form-input"
+                required
+              >
+                <option value="ABONNEMENT">ABONNEMENT </option>
+                <option value="SEMAINE">SEMAINE </option>
+              </select>
+            </div>
+            <div v-if="depositForm.categorie === 'SEMAINE'" class="category-info">
+              <p>⚠️ Cette catégorie est réservée aux membres autorisés uniquement</p>
+            </div>
             <button type="submit" class="btn-primary" :disabled="depositLoading">
-              {{ depositLoading ? 'Dépôt en cours...' : 'Déposer' }}
+              {{ depositLoading ? 'Dépôt en cours...' : `Déposer (${depositForm.categorie})` }}
             </button>
             <p v-if="depositError" class="error">{{ depositError }}</p>
             <p v-if="depositSuccess" class="success">{{ depositSuccess }}</p>
           </form>
+        </div>
+
+        <!-- Message d'erreur de chargement -->
+        <div v-if="dataLoadError" class="error-card">
+          <p>⚠️ {{ dataLoadError }}</p>
         </div>
 
         <div v-if="user?.role === 'ADMIN'" class="action-card admin-card">
@@ -51,6 +71,49 @@
             <button @click="showWithdrawModal = true" class="admin-btn withdraw">
               Effectuer un retrait
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Gestion des Membres (Admin uniquement) -->
+      <section v-if="user?.role === 'ADMIN'" class="members-section">
+        <h2>Gestion des Membres</h2>
+        
+        <div class="members-header">
+          <p>Gestion des membres autorisés pour les dépôts de catégorie SEMAINE</p>
+          <div class="members-actions">
+            <button @click="showAddMemberModal = true" class="admin-btn add-member">
+              Ajouter un membre
+            </button>
+            <button @click="downloadWeeklyReport" class="admin-btn report">
+               Télécharger le rapport PDF
+            </button>
+          </div>
+        </div>
+
+        <div v-if="members.length === 0" class="empty-state">
+          <p>Aucun membre enregistré</p>
+        </div>
+        
+        <div v-else class="members-list">
+          <div
+            v-for="member in members"
+            :key="member.id"
+            class="member-item"
+          >
+            <div class="member-info">
+              <div class="member-name">{{ member.nom }}</div>
+              <div class="member-details">
+                <span class="member-username">@{{ member.user?.username }}</span>
+                <span class="member-email">{{ member.user?.email }}</span>
+                <span class="member-date">Ajouté le {{ formatDate(member.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button @click="removeMember(member.userId, member.nom)" class="remove-btn">
+                Supprimer
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -92,7 +155,9 @@
                 <div class="transaction-info">
                   <span class="transaction-type">
                     <span class="user-name">{{ getUsername(transaction) }}</span> 
-                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span> d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
+                    a effectué un <span class="transaction-type-highlight">{{ transaction.type }}</span>
+                    <span v-if="transaction.categorie" class="transaction-category">({{ transaction.categorie }})</span>
+                    d'un montant de <span class="transaction-amount-highlight">{{ formatCurrency(transaction.amount) }}</span>
                   </span>
                 </div>
                 <div class="transaction-meta">
@@ -326,6 +391,55 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Ajout Membre -->
+  <div v-if="showAddMemberModal" class="modal-overlay" @click="showAddMemberModal = false">
+    <div class="modal" @click.stop>
+      <h3>Ajouter un membre</h3>
+      
+      <!-- Formulaire avec liste déroulante -->
+      <form @submit.prevent="addMember">
+        <div class="form-group">
+          <label for="memberUserId">Sélectionner un utilisateur</label>
+          <select
+            id="memberUserId"
+            v-model="memberForm.userId"
+            @change="updateMemberName"
+            required
+            class="form-input"
+            :disabled="loadingUsers"
+          >
+            <option value="" disabled>-- Choisir un utilisateur --</option>
+            <option 
+              v-for="user in availableUsers" 
+              :key="user.id" 
+              :value="user.id"
+            >
+              {{ user.username }} ({{ user.email }})
+            </option>
+          </select>
+          <div v-if="loadingUsers" class="loading-text">Chargement des utilisateurs...</div>
+        </div>
+
+        <div class="form-group">
+          <label for="memberName">Nom du membre</label>
+          <input
+            type="text"
+            id="memberName"
+            v-model="memberForm.nom"
+            placeholder="Nom complet du membre"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" @click="showAddMemberModal = false">Annuler</button>
+          <button type="submit" :disabled="!memberForm.userId || !memberForm.nom">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -341,6 +455,7 @@ interface Transaction {
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   userId: string
+  categorie?: 'SEMAINE' | 'ABONNEMENT'
   user?: {
     username: string
     email: string
@@ -349,11 +464,56 @@ interface Transaction {
   justification?: string
 }
 
+interface Member {
+  id: string
+  userId: string
+  nom: string
+  createdAt: string
+  user?: {
+    username: string
+    email: string
+    role: string
+  }
+}
+
+interface AvailableUser {
+  id: string
+  username: string
+  email: string
+  role: string
+}
+
 const router = useRouter()
 const authStore = useAuthStore()
 
 const balance = ref(0)
 const transactions = ref<Transaction[]>([])
+const members = ref<Member[]>([])
+
+// Formulaires
+const depositForm = ref({
+  amount: 0,
+  categorie: 'ABONNEMENT' as 'SEMAINE' | 'ABONNEMENT'
+})
+
+const memberForm = ref({
+  userId: '',
+  nom: ''
+})
+
+const availableUsers = ref<AvailableUser[]>([])
+const loadingUsers = ref(false)
+
+// Modales
+const showAddMemberModal = ref(false)
+
+// Watcher pour charger les utilisateurs quand on ouvre le modal
+import { watch } from 'vue'
+watch(showAddMemberModal, (newValue) => {
+  if (newValue && availableUsers.value.length === 0) {
+    loadAvailableUsers()
+  }
+})
 
 const pendingTransactions = computed(() => {
   return transactions.value.filter(t => t.status === 'PENDING')
@@ -371,7 +531,6 @@ const allWithdrawals = computed(() => {
   return transactions.value.filter(t => t.type === 'RETRAIT')
 })
 
-const depositForm = ref({ amount: 0 })
 const withdrawForm = ref({ amount: 0, justification: '' })
 
 const depositLoading = ref(false)
@@ -380,6 +539,7 @@ const withdrawLoading = ref(false)
 const depositError = ref('')
 const withdrawError = ref('')
 const depositSuccess = ref('')
+const dataLoadError = ref('')
 
 const user = computed(() => authStore.user)
 
@@ -441,37 +601,39 @@ const loadUserData = async () => {
     const transactionsResponse = await api.get('/transactions/all')
     transactions.value = transactionsResponse.data
 
+    // Récupérer les membres (si admin)
+    if (authStore.user?.role === 'ADMIN') {
+      const membersResponse = await api.get('/members/all')
+      members.value = membersResponse.data
+    }
+
     console.log('Structure des transactions:', transactions.value[0])
 
 
     // Récupérer le solde depuis le backend
     const balanceResponse = await api.get('/transactions/balance')
     balance.value = balanceResponse.data.balance
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors du chargement des données:', error)
-    logout()
-  }
-}
-
-const handleDeposit = async () => {
-  depositLoading.value = true
-  depositError.value = ''
-  depositSuccess.value = ''
-
-  try {
-    await api.post('/transactions/deposit', {
-      amount: depositForm.value.amount
-    })
-
-    depositSuccess.value = 'Dépôt soumis avec succès!'
-    depositForm.value.amount = 0
     
-    // Recharger les données
-    await loadUserData()
-  } catch (err: any) {
-    depositError.value = err.response?.data?.message || 'Erreur lors du dépôt'
-  } finally {
-    depositLoading.value = false
+    // Ne pas déconnecter l'utilisateur pour une erreur 500 du backend
+    if (error.response?.status === 401) {
+      logout()
+    } else {
+      // Afficher une erreur mais rester connecté
+      dataLoadError.value = 'Erreur de chargement des données. Certaines fonctionnalités peuvent être limitées.'
+      console.warn('Erreur de chargement des données, mais l\'utilisateur reste connecté')
+      // Charger les données de base si possible
+      try {
+        if (authStore.user?.role === 'ADMIN') {
+          // Essayer de charger uniquement les membres
+          const membersResponse = await api.get('/members/all')
+          members.value = membersResponse.data
+        }
+      } catch (memberError) {
+        console.warn('Impossible de charger les membres:', memberError)
+      }
+    }
   }
 }
 
@@ -595,6 +757,125 @@ const getUsername = (transaction: Transaction) => {
   
   // Fallback: ID utilisateur
   return `User-${transaction.userId?.slice(0, 8) || 'Inconnu'}`
+}
+
+// Fonctions pour la gestion des membres
+const loadMembers = async () => {
+  try {
+    const response = await api.get('/members/all')
+    members.value = response.data
+  } catch (error) {
+    console.error('Erreur chargement membres:', error)
+  }
+}
+
+const loadAvailableUsers = async () => {
+  loadingUsers.value = true
+  try {
+    const response = await api.get('/users/all')
+    availableUsers.value = response.data
+  } catch (error) {
+    console.error('Erreur chargement utilisateurs disponibles:', error)
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+const updateMemberName = () => {
+  const selectedUser = availableUsers.value.find(u => u.id === memberForm.value.userId)
+  if (selectedUser) {
+    memberForm.value.nom = selectedUser.username
+  }
+}
+
+const addMember = async () => {
+  try {
+    await api.post('/members/add', {
+      userId: memberForm.value.userId,
+      nom: memberForm.value.nom
+    })
+    
+    // Recharger la liste des membres
+    await loadMembers()
+    
+    // Réinitialiser et fermer le modal
+    memberForm.value = { userId: '', nom: '' }
+    showAddMemberModal.value = false
+    
+    alert('Membre ajouté avec succès!')
+  } catch (error: any) {
+    console.error('Erreur ajout membre:', error)
+    alert(error.response?.data?.message || 'Erreur lors de l\'ajout du membre')
+  }
+}
+
+const removeMember = async (memberId: string, memberName: string) => {
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer ${memberName} des membres ?`)) {
+    return
+  }
+  
+  try {
+    await api.delete(`/members/remove/${memberId}`)
+    
+    // Recharger la liste des membres
+    await loadMembers()
+    
+    alert('Membre supprimé avec succès!')
+  } catch (error: any) {
+    console.error('Erreur suppression membre:', error)
+    alert(error.response?.data?.message || 'Erreur lors de la suppression du membre')
+  }
+}
+
+// Fonction pour les dépôts catégorisés
+const handleDepositWithCategory = async () => {
+  depositLoading.value = true
+  depositError.value = ''
+  depositSuccess.value = ''
+
+  try {
+    await api.post('/transactions/deposit-with-category', {
+      amount: depositForm.value.amount,
+      categorie: depositForm.value.categorie
+    })
+
+    depositSuccess.value = `Dépôt de ${formatCurrency(depositForm.value.amount)} (${depositForm.value.categorie}) effectué avec succès!`
+    depositForm.value.amount = 0
+    
+    // Recharger les données
+    await loadUserData()
+  } catch (err: any) {
+    console.error('Erreur dépôt catégorisé:', err)
+    if (err.response?.status === 403) {
+      depositError.value = 'Seuls les membres peuvent faire des dépôts de catégorie SEMAINE'
+    } else {
+      depositError.value = err.response?.data?.message || 'Erreur lors du dépôt'
+    }
+  } finally {
+    depositLoading.value = false
+  }
+}
+
+// Fonction pour les rapports PDF
+const downloadWeeklyReport = async () => {
+  try {
+    const response = await api.get('/reports/current-week', {
+      responseType: 'blob'
+    })
+    
+    // Créer un lien pour télécharger le PDF
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `rapport-hebdomadaire-${new Date().toISOString().split('T')[0]}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Erreur téléchargement rapport:', error)
+    alert('Erreur lors du téléchargement du rapport PDF')
+  }
 }
 
 const logout = () => {
