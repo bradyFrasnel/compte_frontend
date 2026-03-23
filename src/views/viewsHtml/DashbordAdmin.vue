@@ -3,7 +3,7 @@
     <header class="dashboard-header">
       <div class="header-left">
         <button @click="logout" class="logout-icon-btn desktop-only" title="Déconnexion">
-          <span class="logout-icon">🚪</span>
+          <img src="/src/assets/icones/deconnexion.png" alt="Déconnexion" class="header-icon-img">
         </button>
       </div>
 
@@ -15,7 +15,7 @@
       <!-- Desktop : bouton Profil | Mobile : bouton ☰ -->
       <div class="user-info header-right">
         <button @click="showProfileModal = true" class="profile-icon-btn desktop-only" title="Profil">
-          <span class="profile-icon">👤</span>
+          <img src="/src/assets/icones/utilisateur.png" alt="Profil" class="header-icon-img">
         </button>
         <button @click="toggleDrawer" class="drawer-toggle" title="Menu">
           <span class="hamburger-icon">☰</span>
@@ -34,12 +34,11 @@
     <div class="mobile-drawer" :class="{ 'mobile-drawer--open': showDrawer }">
       <!-- En-tête du drawer -->
       <div class="drawer-header">
-        <div class="drawer-avatar">👤</div>
+        <div class="drawer-avatar">
+          <img src="/src/assets/icones/utilisateur.png" alt="Utilisateur" class="drawer-header-icon">
+        </div>
         <div class="drawer-user-info">
           <span class="drawer-username">{{ user?.username }}</span>
-          <span class="drawer-role" :class="user?.role?.toLowerCase()">
-            {{ user?.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur' }}
-          </span>
         </div>
         <button class="drawer-close" @click="closeDrawer">✕</button>
       </div>
@@ -47,12 +46,16 @@
       <!-- Infos profil inline -->
       <div class="drawer-profile-info">
         <div class="drawer-info-item">
-          <span class="drawer-info-label">📧 Email</span>
+          <span class="drawer-info-label">
+            <img src="/src/assets/icones/email.png" alt="Email" class="drawer-item-icon"> Email
+          </span>
           <span class="drawer-info-value">{{ user?.email }}</span>
         </div>
         <div class="drawer-info-item">
-          <span class="drawer-info-label">🏷️ Rôle</span>
-          <span class="drawer-info-value role-badge" :class="user?.role?.toLowerCase()">
+          <span class="drawer-info-label">
+            <img src="/src/assets/icones/jouer-un-role.png" alt="Rôle" class="drawer-item-icon"> Rôle
+          </span>
+          <span class="drawer-info-value" :class="user?.role?.toLowerCase()">
             {{ user?.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur' }}
           </span>
         </div>
@@ -62,10 +65,11 @@
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="drawer-actions">
-        <button @click="logout(); closeDrawer()" class="drawer-logout-btn">
-          <span>🚪</span> Se déconnecter
+      <!-- Action de déconnexion discrète -->
+      <div class="drawer-actions-new">
+        <button @click="logout(); closeDrawer()" class="drawer-logout-icon-btn" title="Se déconnecter">
+          <img src="/src/assets/icones/deconnexion.png" alt="Déconnexion" class="logout-icon-new">
+          <span>Se déconnecter</span>
         </button>
       </div>
     </div>
@@ -443,7 +447,7 @@
     <div class="modal profile-modal" @click.stop>
       <div class="profile-header">
         <div class="profile-avatar">
-          <span class="profile-avatar-icon">👤</span>
+          <img src="/src/assets/icones/utilisateur.png" alt="Profil" class="profile-avatar-img">
         </div>
         <h3>Profil Utilisateur</h3>
       </div>

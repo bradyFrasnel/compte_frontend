@@ -552,7 +552,7 @@
   margin-top: 0.5rem;
   padding: 0.5rem;
   background: var(--gray-50);
-  border-left: 3px solid var(--navy-blue);
+  border-left: 3px solid var(--jade-green);
   border-radius: 4px;
   font-size: 0.75rem;
   color: var(--gray-700);
@@ -1927,7 +1927,7 @@
 
 .hamburger-icon {
   font-size: 1.5rem;
-  color: var(--navy-blue);
+  color: var(--jade-green);
   line-height: 1;
 }
 
@@ -1979,7 +1979,7 @@
   align-items: center;
   gap: 0.875rem;
   padding: 1.25rem 1rem;
-  background: linear-gradient(135deg, var(--navy-blue), var(--navy-blue-dark, #1e3a8a));
+  background: linear-gradient(135deg, var(--jade-green), var(--jade-green-dark));
   border-radius: 16px 0 0 0;
   position: relative;
 }
@@ -2097,34 +2097,69 @@
   color: var(--gray-600);
 }
 
-/* Bouton déconnexion */
-.drawer-actions {
-  padding: 1.25rem 1rem;
-  border-top: 1px solid var(--gray-100);
-  margin-top: auto; /* Pousse la déconnexion tout en bas du drawer */
+/* Style pour le nouveau bouton de déconnexion discret */
+.drawer-actions-new {
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0;
 }
 
-.drawer-logout-btn {
+.drawer-logout-icon-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.875rem;
-  background: var(--error);
-  color: var(--white);
+  gap: 0.75rem;
+  background: transparent;
   border: none;
-  border-radius: 10px;
   cursor: pointer;
+  padding: 0.75rem 0;
+  width: 100%;
+  color: var(--error);
   font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.25s ease;
+  font-size: 0.875rem;
+  transition: opacity 0.2s ease;
+  border-top: 1px solid var(--gray-100);
 }
 
-.drawer-logout-btn:hover {
-  background: #DC2626;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+.drawer-logout-icon-btn:hover {
+  opacity: 0.8;
+}
+
+.logout-icon-new {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.header-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.drawer-header-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.drawer-item-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.profile-avatar-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.drawer-info-label {
+  display: flex;
+  align-items: center;
 }
 
 /* Mobile : activer hamburger, cacher profil desktop */
@@ -2142,7 +2177,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--navy-blue);
+  color: var(--jade-green);
   font-weight: 600;
   font-size: 0.875rem;
   text-decoration: none;
@@ -2151,5 +2186,5 @@
 }
 
 .drawer-admin-link:hover {
-  color: var(--navy-blue-dark, #1e3a8a);
+  color: var(--jade-green-dark);
 }
