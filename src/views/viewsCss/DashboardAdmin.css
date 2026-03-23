@@ -252,6 +252,7 @@
   transition: all 0.3s ease;
   font-weight: 600;
   text-align: center;
+  font-size: 16px;
 }
 
 .admin-btn:hover {
@@ -291,6 +292,14 @@
   margin-bottom: 1.5rem;
   border-bottom: 2px solid var(--gray-200);
   padding-bottom: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.tabs-navigation::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .tab-button {
@@ -772,7 +781,7 @@
   padding: 0.75rem;
   border: 1px solid var(--gray-300);
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 16px; /* Empêche le zoom auto sur mobile */
   transition: border-color 0.3s ease;
 }
 
@@ -787,7 +796,7 @@
   padding: 0.75rem;
   border: 1px solid var(--gray-300);
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 16px; /* Empêche le zoom auto sur mobile */
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.3s ease;
@@ -2170,6 +2179,26 @@
 
   .desktop-only {
     display: none !important;
+  }
+
+  .dashboard-header {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .dashboard-main {
+    padding: 1rem 0.5rem;
+  }
+
+  .balance-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .action-card {
+    padding: 1rem;
+  }
+
+  .shabaFAI {
+    font-size: 1.25rem;
   }
 }
 
